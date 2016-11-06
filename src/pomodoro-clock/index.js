@@ -8,7 +8,7 @@ export function toMMSS (seconds) {
     throw Error('number of seconds must be a number')
   }
   if (seconds < 0) {
-    throw Error('number of seconds must be greater than zero')
+    throw Error('number of seconds must be greater than zero: ' + seconds)
   }
   const _minutes = Math.floor(seconds / 60)
   let _seconds = seconds - (_minutes * 60)
@@ -19,12 +19,16 @@ export function toMMSS (seconds) {
   return _minutes + ':' + _seconds
 }
 
-const INITIAL_NUMBER_SECONDS = 1500
+const INITIAL_SESSION_LENGTH = 25 * 60
+const INITIAL_BREAK_LENGTH = 3 * 60
 export default class PomodoroClock extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      secondsInTimer: INITIAL_NUMBER_SECONDS,
+      secondsInTimer: INITIAL_SESSION_LENGTH,
+      sessionLength: INITIAL_SESSION_LENGTH,
+      breakLength: INITIAL_BREAK_LENGTH,
+      currentPhase: 'session',
       ticking: false
     }
     this.handleStartButtonClick = this.handleStartButtonClick.bind(this)
@@ -44,7 +48,7 @@ export default class PomodoroClock extends Component {
         return
       }
       if (this.state.secondsInTimer <= 0) {
-        return
+        this.phaseSwitch()
       }
       this.setState({
         secondsInTimer: this.state.secondsInTimer - 1
@@ -53,10 +57,30 @@ export default class PomodoroClock extends Component {
     }, 1000)
   }
 
+  phaseSwitch () {
+    switch (this.state.currentPhase) {
+      case 'session':
+        this.setState({
+          currentPhase: 'break',
+          secondsInTimer: this.state.breakLength
+        })
+        break
+      case 'break':
+        this.setState({
+          currentPhase: 'session',
+          secondsInTimer: this.state.sessionLength
+        })
+        break
+      default:
+        throw Error('Unexpected phase: ' + this.state.currentPhase)
+    }
+  }
+
   reset () {
     this.setState({
-      secondsInTimer: INITIAL_NUMBER_SECONDS,
-      ticking: false
+      secondsInTimer: this.state.sessionLength,
+      ticking: false,
+      currentPhase: 'session'
     })
   }
 
