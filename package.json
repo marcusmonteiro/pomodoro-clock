@@ -1,0 +1,59 @@
+{
+  "name": "pomodoro-clock",
+  "version": "0.1.0",
+  "keywords": [
+    "pomodoro",
+    "clock",
+    "pomodoro clock",
+    "javascript",
+    "react",
+    "FreeCodeCamp",
+    "frontend"
+  ],
+  "homepage": "https://marcusmonteiro.github.io/pomodoro-clock",
+  "bugs": {
+    "url": "https://github.com/marcusmonteiro/pomodoro-clock/issues",
+    "email": "mvsouza007@gmail.com"
+  },
+  "author": {
+    "name": "Marcus Vinicius Monteiro de Souza",
+    "email": "mvsouza007@gmail.com",
+    "url": "https://marcusmonteiro.github.io/"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/marcusmonteiro/pomodoro-clock.git"
+  },
+  "private": true,
+  "devDependencies": {
+    "enzyme": "^2.5.1",
+    "gh-pages": "^0.11.0",
+    "react-addons-test-utils": "^15.3.2",
+    "react-scripts": "0.7.0",
+    "sinon": "^1.17.6",
+    "snazzy": "^5.0.0",
+    "standard": "^8.5.0",
+    "stylelint": "^7.5.0",
+    "stylelint-config-standard": "^14.0.0"
+  },
+  "dependencies": {
+    "react": "^15.3.2",
+    "react-dom": "^15.3.2",
+    "sanitize.css": "^4.1.0"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "lint:js": "standard --verbose --fix | snazzy",
+    "lint:css": "stylelint src/**/*.css",
+    "lint": "npm run lint:js && npm run lint:css",
+    "test:unit": "react-scripts test --env=jsdom",
+    "test": "npm run lint && npm run test:unit",
+    "deploy": "gh-pages -d build",
+    "eject": "react-scripts eject"
+  },
+  "stylelint": {
+    "extends": "stylelint-config-standard"
+  }
+}
