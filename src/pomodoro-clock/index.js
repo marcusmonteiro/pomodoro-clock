@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
-import { CircularProgress, RaisedButton } from 'material-ui'
+import { CircularProgress, RaisedButton, FontIcon } from 'material-ui'
 import { Grid, Row, Col } from 'react-bootstrap'
 import { toMMSS, secondsToMinutes } from './utils'
 import { SECONDS_IN_A_MINUTE } from './constants'
@@ -20,7 +20,8 @@ const styles = {
       left: '3em'
     },
     buttons: {
-      paddingTop: '2em'
+      paddingTop: '2em',
+      width: '71em'
     }
   }
 }
@@ -35,7 +36,7 @@ export default class PomodoroClock extends Component {
       ticking: false
     }
     this.handleStartButtonClick = this.handleStartButtonClick.bind(this)
-    this.reset = this.reset.bind(this)
+    this.set = this.set.bind(this)
   }
 
   handleStartButtonClick (e) {
@@ -83,7 +84,7 @@ export default class PomodoroClock extends Component {
     }
   }
 
-  reset () {
+  set () {
     this.setState({
       secondsInTimer: this.state.sessionLength,
       ticking: false,
@@ -168,37 +169,70 @@ export default class PomodoroClock extends Component {
       </Row>
     )
 
-    const timer = () => (
-      <div style={styles.timer}>
-        <Row>
-          <Col smOffset={2} mdOffset={2} xsOffset={2}>
-            {toMMSS(this.state.secondsInTimer)}
-          </Col>
-        </Row>
-        <Row>
-          <Col smOffset={1}>
-            <CircularProgress
-              style={styles.timer.progress}
-              mode='determinate'
-              max={this.state.sessionLength}
-              min={0}
-              value={this.state.secondsInTimer}
-              size={150}
-              />
-          </Col>
-        </Row>
-        <Row>
-          <div style={styles.timer.buttons}>
-            <Col sm={2} md={2} xs={2} smOffset={1} mdOffset={1} xsOffset={1 }>
-              <RaisedButton onClick={this.handleStartButtonClick}>Start</RaisedButton>
+    function timer (phase, that) {
+      let iconBesideTimer
+      let progressColor
+      let max
+
+      switch (phase) {
+        case 'session':
+          iconBesideTimer = <FontIcon className='fa fa-book' />
+          max = that.state.sessionLength
+          break
+        case 'break':
+          iconBesideTimer = <FontIcon className='fa fa-soccer-ball-o' />
+          progressColor = '#4CAF50'
+          max = that.state.breakLength
+          break
+        default:
+          throw Error('invalid phase: ' + phase)
+      }
+
+      return (
+        <div style={styles.timer}>
+          <Row>
+            <Col smOffset={2} mdOffset={2} xsOffset={2}>
+              {iconBesideTimer}
+              <span />
+              {toMMSS(that.state.secondsInTimer)}
             </Col>
-            <Col>
-              <RaisedButton onClick={this.reset}>Reset</RaisedButton>
+          </Row>
+          <Row>
+            <Col smOffset={1}>
+              <CircularProgress
+                style={styles.timer.progress}
+                mode='determinate'
+                max={max}
+                min={0}
+                value={that.state.secondsInTimer}
+                size={150}
+                color={progressColor}
+                />
             </Col>
-          </div>
-        </Row>
-      </div>
-    )
+          </Row>
+          <Row>
+            <div style={styles.timer.buttons}>
+              <Col sm={2} md={2} xs={2} smOffset={1} mdOffset={1} xsOffset={1}>
+                <RaisedButton
+                  onClick={that.handleStartButtonClick}
+                  label='Start'
+                  primary
+                  icon={<FontIcon className='fa fa-play' />}
+                  />
+              </Col>
+              <Col>
+                <RaisedButton
+                  onClick={that.set}
+                  label='Set'
+                  secondary
+                  icon={<FontIcon className='fa fa-stop' />}
+                  />
+              </Col>
+            </div>
+          </Row>
+        </div>
+      )
+    }
 
     return (
       <MuiThemeProvider>
@@ -206,7 +240,7 @@ export default class PomodoroClock extends Component {
           <Grid>
             {sessionLengthManipulation}
             {breakLengthManipulation}
-            {timer()}
+            {timer(this.state.currentPhase, this)}
           </Grid>
         </div>
       </MuiThemeProvider>

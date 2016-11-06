@@ -1,5 +1,8 @@
 /* eslint-env jest */
 
+// TODO: Discover why tests are failing despite the app doing what it's supposed
+// todo in practice
+
 import React from 'react'
 import chai from 'chai'
 import chaiEnzyme from 'chai-enzyme'
@@ -15,17 +18,13 @@ let wrapper
 let sessionLength
 let breakLength
 let startButton
-let resetButton
+let setButton
 beforeEach(() => {
   wrapper = mount(<PomodoroClock />)
   sessionLength = wrapper.state().sessionLength
   breakLength = wrapper.state().breakLength
-  startButton = wrapper.findWhere((node) => {
-    return node.text() === 'Start' && (node.type() === 'button')
-  })
-  resetButton = wrapper.findWhere((node) => {
-    return node.text() === 'Reset' && (node.type() === 'button')
-  })
+  startButton = wrapper.find('RaisedButton').first()
+  setButton = wrapper.find('RaisedButton').last()
 })
 
 describe('<PomodoroClock />', () => {
@@ -47,8 +46,8 @@ describe('<PomodoroClock />', () => {
     chai.expect(wrapper).to.contain.text(toMMSS(sessionLength - 1))
   })
 
-  it(`should start a timer when the 'start' button is clicked and reset the timer
-      when the 'reset' button is clicked`, () => {
+  it(`should start a timer when the 'start' button is clicked and set the timer
+      when the 'set' button is clicked`, () => {
     chai.expect(wrapper).to.contain.text(toMMSS(sessionLength))
 
     startButton.simulate('click')
@@ -57,7 +56,7 @@ describe('<PomodoroClock />', () => {
     jest.runTimersToTime(1000)
     chai.expect(wrapper).to.contain.text(toMMSS(sessionLength - 2))
 
-    resetButton.simulate('click')
+    setButton.simulate('click')
     chai.expect(wrapper).to.contain.text(toMMSS(sessionLength))
     jest.runTimersToTime(1000)
     chai.expect(wrapper).to.contain.text(toMMSS(sessionLength))
