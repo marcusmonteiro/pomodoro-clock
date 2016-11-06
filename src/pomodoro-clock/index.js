@@ -10,7 +10,7 @@ const INITIAL_BREAK_LENGTH = 3 * SECONDS_IN_A_MINUTE
 
 const styles = {
   pomodoroClock: {
-    width: '42em'
+    width: 730
   },
   timer: {
     paddingTop: '1em',
@@ -20,8 +20,7 @@ const styles = {
       left: '3em'
     },
     buttons: {
-      paddingTop: '2em',
-      width: '71em'
+      paddingTop: '2em'
     }
   }
 }
