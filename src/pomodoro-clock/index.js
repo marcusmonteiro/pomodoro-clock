@@ -1,17 +1,23 @@
 import React, { Component } from 'react'
 
+const SECONDS_IN_A_MINUTE = 60
+
+function throwErrorIfNotPositiveNumber (arg, argName) {
+  if (arg == null) {
+    throw Error('number of ' + argName + ' must be defined')
+  }
+  if (!(typeof (arg) === 'number')) {
+    throw Error('number of ' + argName + ' must be a number')
+  }
+  if (arg < 0) {
+    throw Error('number of ' + argName + ' must be greater than zero: ' + arg)
+  }
+}
+
 export function toMMSS (seconds) {
-  if (seconds == null) {
-    throw Error('number of seconds must be defined')
-  }
-  if (!(typeof (seconds) === 'number')) {
-    throw Error('number of seconds must be a number')
-  }
-  if (seconds < 0) {
-    throw Error('number of seconds must be greater than zero: ' + seconds)
-  }
-  const _minutes = Math.floor(seconds / 60)
-  let _seconds = seconds - (_minutes * 60)
+  throwErrorIfNotPositiveNumber(seconds, 'seconds')
+  const _minutes = secondsToMinutes(seconds)
+  let _seconds = seconds - (_minutes * SECONDS_IN_A_MINUTE)
 
   if (_seconds < 10) {
     _seconds = '0' + _seconds
@@ -19,8 +25,14 @@ export function toMMSS (seconds) {
   return _minutes + ':' + _seconds
 }
 
-const INITIAL_SESSION_LENGTH = 25 * 60
-const INITIAL_BREAK_LENGTH = 3 * 60
+export function secondsToMinutes (seconds) {
+  throwErrorIfNotPositiveNumber(seconds, 'seconds')
+  return Math.floor(seconds / SECONDS_IN_A_MINUTE)
+}
+
+const INITIAL_SESSION_LENGTH = 25 * SECONDS_IN_A_MINUTE
+const INITIAL_BREAK_LENGTH = 3 * SECONDS_IN_A_MINUTE
+
 export default class PomodoroClock extends Component {
   constructor (props) {
     super(props)
@@ -84,9 +96,71 @@ export default class PomodoroClock extends Component {
     })
   }
 
+  handleSessionManipulationButtonClick (e) {
+    switch (e) {
+      case '+':
+        this.setState({
+          sessionLength: this.state.sessionLength + SECONDS_IN_A_MINUTE
+        })
+        break
+      case '-':
+        if (this.state.sessionLength > SECONDS_IN_A_MINUTE) {
+          this.setState({
+            sessionLength: this.state.sessionLength - SECONDS_IN_A_MINUTE
+          })
+        }
+        break
+      default:
+        throw Error('Unexpected value: ' + e)
+    }
+  }
+
+  handleBreakManipulationButtonClick (e) {
+    switch (e) {
+      case '+':
+        this.setState({
+          breakLength: this.state.breakLength + SECONDS_IN_A_MINUTE
+        })
+        break
+      case '-':
+        if (this.state.breakLength > SECONDS_IN_A_MINUTE) {
+          this.setState({
+            breakLength: this.state.breakLength - SECONDS_IN_A_MINUTE
+          })
+        }
+        break
+      default:
+        throw Error('Unexpected value: ' + e)
+    }
+  }
+
   render () {
+    const sessionLengthManipulation = (
+      <div id='sessionLengthManipulation'>
+        Session length:
+        {secondsToMinutes(this.state.sessionLength)}
+        <button id='buttonPlusSessionLength'
+          onClick={this.handleSessionManipulationButtonClick.bind(this, '+')}>+</button>
+        <button id='buttonMinusSessionLength'
+          onClick={this.handleSessionManipulationButtonClick.bind(this, '-')}>-</button>
+      </div>
+    )
+
+    const breakLengthManipulation = (
+      <div id='breakLengthManipulation'>
+        Break length:
+        {secondsToMinutes(this.state.breakLength)}
+        <button id='buttonPlusBreakLength'
+          onClick={this.handleBreakManipulationButtonClick.bind(this, '+')}>+</button>
+        <button id='buttonMinusBreakLength'
+          onClick={this.handleBreakManipulationButtonClick.bind(this, '-')}>-</button>
+      </div>
+    )
+
     return (
       <div>
+        {sessionLengthManipulation}
+        {breakLengthManipulation}
         {toMMSS(this.state.secondsInTimer)}
         <button onClick={this.handleStartButtonClick}>Start</button>
         <button onClick={this.reset}>Reset</button>
