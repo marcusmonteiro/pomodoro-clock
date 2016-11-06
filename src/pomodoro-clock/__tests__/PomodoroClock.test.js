@@ -1,8 +1,14 @@
 /* eslint-env jest */
 
-// import React from 'react'
-// import { shallow } from 'enzyme'
-import { toMMSS } from '..'
+import React from 'react'
+import chai from 'chai'
+import chaiEnzyme from 'chai-enzyme'
+import { shallow, mount } from 'enzyme'
+import PomodoroClock, { toMMSS } from '..'
+
+chai.use(chaiEnzyme())
+
+jest.useFakeTimers()
 
 describe('toMMSS', () => {
   it('convert a number of seconds to a MM:SS string', () => {
@@ -26,5 +32,37 @@ describe('toMMSS', () => {
         toMMSS(arg)
       }).toThrow()
     })
+  })
+})
+
+describe('<PomodoroClock />', () => {
+  it('should initially display 25 minutes as a MM:SS formatted string', () => {
+    const wrapper = shallow(<PomodoroClock />)
+    chai.expect(wrapper).to.contain.text('25:00')
+  })
+
+  it(`should start a timer when the 'start' button is clicked and reset the timer
+      when the 'reset' button is clicked`, () => {
+    const wrapper = mount(<PomodoroClock />)
+    chai.expect(wrapper).to.contain.text('25:00')
+
+    const startButton = wrapper.find('button').first()
+    startButton.simulate('click')
+    jest.runTimersToTime(1000)
+    chai.expect(wrapper).to.contain.text('24:59')
+    jest.runTimersToTime(1000)
+    chai.expect(wrapper).to.contain.text('24:58')
+
+    const resetButton = wrapper.find('button').last()
+    resetButton.simulate('click')
+    chai.expect(wrapper).to.contain.text('25:00')
+    jest.runTimersToTime(1000)
+    chai.expect(wrapper).to.contain.text('25:00')
+
+    startButton.simulate('click')
+    jest.runAllTimers()
+    chai.expect(wrapper).to.contain.text('0:00')
+    jest.runTimersToTime(1000)
+    chai.expect(wrapper).to.contain.text('0:00')
   })
 })
