@@ -3,59 +3,13 @@
 import React from 'react'
 import chai from 'chai'
 import chaiEnzyme from 'chai-enzyme'
-import { shallow, mount } from 'enzyme'
-import PomodoroClock, { toMMSS, secondsToMinutes } from '..'
+import { mount } from 'enzyme'
+import PomodoroClock from '..'
+import { toMMSS, secondsToMinutes } from '../utils'
 
 chai.use(chaiEnzyme())
 
 jest.useFakeTimers()
-
-describe('secondsToMinutes', () => {
-  it('converts a number of seconds to a number of minutes', () => {
-    expect(secondsToMinutes(0)).toBe(0)
-    expect(secondsToMinutes(1)).toBe(0)
-    expect(secondsToMinutes(60)).toBe(1)
-    expect(secondsToMinutes(61)).toBe(1)
-    expect(secondsToMinutes(120)).toBe(2)
-    expect(() => {
-      secondsToMinutes()
-    }).toThrow()
-    function foo () {
-      return
-    }
-    const invalidArguments = [-1, '', ' ', '1', {}, foo, {foo: 1}, [], [0], null, undefined]
-    invalidArguments.forEach((arg) => {
-      expect(() => {
-        secondsToMinutes(arg)
-      }).toThrow()
-    })
-  })
-})
-
-describe('toMMSS', () => {
-  it('convert a number of seconds to a MM:SS string', () => {
-    expect(toMMSS(0)).toBe('0:00')
-    expect(toMMSS(1)).toBe('0:01')
-    expect(toMMSS(60)).toBe('1:00')
-    expect(toMMSS(61)).toBe('1:01')
-    expect(toMMSS(120)).toBe('2:00')
-    expect(toMMSS(121)).toBe('2:01')
-    expect(toMMSS(600)).toBe('10:00')
-    expect(toMMSS(6000)).toBe('100:00')
-    expect(() => {
-      toMMSS()
-    }).toThrow()
-    function foo () {
-      return
-    }
-    const invalidArguments = [-1, '', ' ', '1', {}, foo, {foo: 1}, [], [0], null, undefined]
-    invalidArguments.forEach((arg) => {
-      expect(() => {
-        toMMSS(arg)
-      }).toThrow()
-    })
-  })
-})
 
 let wrapper
 let sessionLength
@@ -67,16 +21,15 @@ beforeEach(() => {
   sessionLength = wrapper.state().sessionLength
   breakLength = wrapper.state().breakLength
   startButton = wrapper.findWhere((node) => {
-    return node.text() === 'Start'
+    return node.text() === 'Start' && (node.type() === 'button')
   })
   resetButton = wrapper.findWhere((node) => {
-    return node.text() === 'Reset'
+    return node.text() === 'Reset' && (node.type() === 'button')
   })
 })
 
 describe('<PomodoroClock />', () => {
   it('should initially display 25 minutes as a MM:SS formatted string', () => {
-    wrapper = shallow(<PomodoroClock />)
     chai.expect(wrapper).to.contain.text('25:00')
   })
 

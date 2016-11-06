@@ -1,38 +1,29 @@
 import React, { Component } from 'react'
-
-const SECONDS_IN_A_MINUTE = 60
-
-function throwErrorIfNotPositiveNumber (arg, argName) {
-  if (arg == null) {
-    throw Error('number of ' + argName + ' must be defined')
-  }
-  if (!(typeof (arg) === 'number')) {
-    throw Error('number of ' + argName + ' must be a number')
-  }
-  if (arg < 0) {
-    throw Error('number of ' + argName + ' must be greater than zero: ' + arg)
-  }
-}
-
-export function toMMSS (seconds) {
-  throwErrorIfNotPositiveNumber(seconds, 'seconds')
-  const _minutes = secondsToMinutes(seconds)
-  let _seconds = seconds - (_minutes * SECONDS_IN_A_MINUTE)
-
-  if (_seconds < 10) {
-    _seconds = '0' + _seconds
-  }
-  return _minutes + ':' + _seconds
-}
-
-export function secondsToMinutes (seconds) {
-  throwErrorIfNotPositiveNumber(seconds, 'seconds')
-  return Math.floor(seconds / SECONDS_IN_A_MINUTE)
-}
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
+import { CircularProgress, RaisedButton } from 'material-ui'
+import { Grid, Row, Col } from 'react-bootstrap'
+import { toMMSS, secondsToMinutes } from './utils'
+import { SECONDS_IN_A_MINUTE } from './constants'
 
 const INITIAL_SESSION_LENGTH = 25 * SECONDS_IN_A_MINUTE
 const INITIAL_BREAK_LENGTH = 3 * SECONDS_IN_A_MINUTE
 
+const styles = {
+  pomodoroClock: {
+    width: '42em'
+  },
+  timer: {
+    paddingTop: '1em',
+    progress: {
+      paddingTop: '1em',
+      paddingBottom: '1em',
+      left: '3em'
+    },
+    buttons: {
+      paddingTop: '2em'
+    }
+  }
+}
 export default class PomodoroClock extends Component {
   constructor (props) {
     super(props)
@@ -48,6 +39,10 @@ export default class PomodoroClock extends Component {
   }
 
   handleStartButtonClick (e) {
+    // To not speed up clock when Start is clicked multiple times
+    if (this.state.ticking) {
+      return
+    }
     this.setState({
       ticking: true
     })
@@ -136,35 +131,85 @@ export default class PomodoroClock extends Component {
 
   render () {
     const sessionLengthManipulation = (
-      <div id='sessionLengthManipulation'>
-        Session length:
-        {secondsToMinutes(this.state.sessionLength)}
-        <button id='buttonPlusSessionLength'
-          onClick={this.handleSessionManipulationButtonClick.bind(this, '+')}>+</button>
-        <button id='buttonMinusSessionLength'
-          onClick={this.handleSessionManipulationButtonClick.bind(this, '-')}>-</button>
-      </div>
+      <Row id='sessionLengthManipulation'>
+        <Col sm={2} md={2} xs={2}>
+          Session length
+        </Col>
+        <Col sm={1} md={1} xs={1}>
+          <button id='buttonPlusSessionLength'
+            onClick={this.handleSessionManipulationButtonClick.bind(this, '+')}>+</button>
+        </Col>
+        <Col sm={1} md={1} xs={1}>
+          {secondsToMinutes(this.state.sessionLength)}
+        </Col>
+        <Col sm={1} md={1} xs={1}>
+          <button id='buttonMinusSessionLength'
+            onClick={this.handleSessionManipulationButtonClick.bind(this, '-')}>-</button>
+        </Col>
+      </Row>
     )
 
     const breakLengthManipulation = (
-      <div id='breakLengthManipulation'>
-        Break length:
-        {secondsToMinutes(this.state.breakLength)}
-        <button id='buttonPlusBreakLength'
-          onClick={this.handleBreakManipulationButtonClick.bind(this, '+')}>+</button>
-        <button id='buttonMinusBreakLength'
-          onClick={this.handleBreakManipulationButtonClick.bind(this, '-')}>-</button>
+      <Row id='breakLengthManipulation'>
+        <Col sm={2} md={2} xs={2}>
+          Break length
+        </Col>
+        <Col sm={1} md={1} xs={1}>
+          <button id='buttonPlusBreakLength'
+            onClick={this.handleBreakManipulationButtonClick.bind(this, '+')}>+</button>
+        </Col>
+        <Col sm={1} md={1} xs={1}>
+          {secondsToMinutes(this.state.breakLength)}
+        </Col>
+        <Col sm={1} md={1} xs={1}>
+          <button id='buttonMinusBreakLength'
+            onClick={this.handleBreakManipulationButtonClick.bind(this, '-')}>-</button>
+        </Col>
+      </Row>
+    )
+
+    const timer = () => (
+      <div style={styles.timer}>
+        <Row>
+          <Col smOffset={2} mdOffset={2} xsOffset={2}>
+            {toMMSS(this.state.secondsInTimer)}
+          </Col>
+        </Row>
+        <Row>
+          <Col smOffset={1}>
+            <CircularProgress
+              style={styles.timer.progress}
+              mode='determinate'
+              max={this.state.sessionLength}
+              min={0}
+              value={this.state.secondsInTimer}
+              size={150}
+              />
+          </Col>
+        </Row>
+        <Row>
+          <div style={styles.timer.buttons}>
+            <Col sm={2} md={2} xs={2} smOffset={1} mdOffset={1} xsOffset={1 }>
+              <RaisedButton onClick={this.handleStartButtonClick}>Start</RaisedButton>
+            </Col>
+            <Col>
+              <RaisedButton onClick={this.reset}>Reset</RaisedButton>
+            </Col>
+          </div>
+        </Row>
       </div>
     )
 
     return (
-      <div>
-        {sessionLengthManipulation}
-        {breakLengthManipulation}
-        {toMMSS(this.state.secondsInTimer)}
-        <button onClick={this.handleStartButtonClick}>Start</button>
-        <button onClick={this.reset}>Reset</button>
-      </div>
+      <MuiThemeProvider>
+        <div style={styles.pomodoroClock}>
+          <Grid>
+            {sessionLengthManipulation}
+            {breakLengthManipulation}
+            {timer()}
+          </Grid>
+        </div>
+      </MuiThemeProvider>
     )
   }
 }
